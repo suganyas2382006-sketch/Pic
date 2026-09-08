@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Edge Particle Reveal</title>
+  <title>Neon Structure Reveal</title>
   <style>
     body { 
       margin: 0; 
-      background: #050510; 
+      background: #000000; /* Pure black for better contrast */
       overflow: hidden; 
       display: flex; 
       justify-content: center; 
@@ -50,32 +50,39 @@
 
       class Particle {
         constructor(x, y, color) {
-          this.targetX = x + offsetX;
-          this.targetY = y + offsetY;
-          this.x = Math.random() * canvas.width;
-          this.y = Math.random() * canvas.height;
+          // Start exactly where they belong to avoid the explosion effect
+          this.x = x + offsetX;
+          this.y = y + offsetY;
+          this.baseX = this.x;
+          this.baseY = this.y;
           this.color = color;
           this.size = Math.random() * 1.5 + 0.5; 
-          this.velocity = Math.random() * 0.03 + 0.015; 
+          
+          // Variables for a gentle twinkling float instead of flying
+          this.angle = Math.random() * Math.PI * 2;
+          this.speed = Math.random() * 0.05 + 0.02;
         }
         
         update() {
-          this.x += (this.targetX - this.x) * this.velocity;
-          this.y += (this.targetY - this.y) * this.velocity;
+          // Subtle floating movement in place
+          this.x = this.baseX + Math.cos(this.angle) * 1.2;
+          this.y = this.baseY + Math.sin(this.angle) * 1.2;
+          this.angle += this.speed;
         }
         
         draw() {
           ctx.beginPath();
           ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
           ctx.fillStyle = this.color;
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 8;
           ctx.shadowColor = this.color;
           ctx.fill();
         }
       }
 
       const gap = 3; 
-      const edgeThreshold = 25; 
+      const edgeThreshold = 30; // Increased to ignore slight photo variations
+      const minBrightness = 40; // STRICTLY ignores background compression noise
 
       for (let y = 0; y < drawHeight - gap; y += gap) {
         for (let x = 0; x < drawWidth - gap; x += gap) {
@@ -86,8 +93,8 @@
           const alpha = pixels[i + 3];
           const b1 = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
           
-          // Skip transparent AND purely black background pixels
-          if (alpha < 50 || b1 < 15) continue; 
+          // If the pixel is dark, kill it immediately. No background noise allowed.
+          if (alpha < 50 || b1 < minBrightness) continue; 
 
           const b2 = (pixels[rightI] + pixels[rightI+1] + pixels[rightI+2]) / 3;
           const b3 = (pixels[bottomI] + pixels[bottomI+1] + pixels[bottomI+2]) / 3;
@@ -103,7 +110,8 @@
       function animate() {
         ctx.shadowBlur = 0; 
         ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(5, 5, 16, 0.15)'; 
+        // Darker clear rectangle to eliminate the long laser trails
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.globalCompositeOperation = 'lighter';
