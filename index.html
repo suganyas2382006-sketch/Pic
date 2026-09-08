@@ -1,817 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Particle Portrait</title>
-
-<style>
-*{
-    box-sizing:border-box;
-}
-
-html,body{
-    margin:0;
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#000;
-    font-family:Arial,sans-serif;
-}
-
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-canvas{
-    position:fixed;
-    inset:0;
-    width:100%;
-    height:100%;
-    background:#000;
-}
-
-#controls{
-    position:fixed;
-    top:20px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:10;
-
-    display:flex;
-    gap:10px;
-    align-items:center;
-
-    padding:10px 14px;
-
-    background:rgba(0,0,0,.55);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:30px;
-
-    backdrop-filter:blur(12px);
-}
-
-#upload{
-    display:none;
-}
-
-.button{
-    color:white;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.18);
-    padding:9px 15px;
-    border-radius:20px;
-    cursor:pointer;
-    font-size:13px;
-}
-
-.button:hover{
-    background:rgba(255,255,255,.16);
-}
-
-#status{
-    position:fixed;
-    bottom:20px;
-    left:50%;
-    transform:translateX(-50%);
-
-    color:rgba(255,255,255,.6);
-    font-size:12px;
-    letter-spacing:1px;
-
-    z-index:10;
-}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neon Edge Particle Reveal</title>
+  <style>
+    body { 
+      margin: 0; 
+      background: #050510; 
+      overflow: hidden; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+    }
+    canvas { display: block; }
+  </style>
 </head>
-
 <body>
-
-<canvas id="canvas"></canvas>
-
-<div id="controls">
-    <label class="button" for="upload">
-        Upload Photo
-    </label>
-
-    <input id="upload" type="file" accept="image/*">
-
-    <button class="button" id="replay">
-        Replay
-    </button>
-</div>
-
-<div id="status">
-    Upload a photo to begin
-</div>
-
-
-<script>
-
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-
-const upload = document.getElementById("upload");
-const replay = document.getElementById("replay");
-const statusText = document.getElementById("status");
-
-let W = innerWidth;
-let H = innerHeight;
-
-canvas.width = W;
-canvas.height = H;
-
-let particles = [];
-let ambient = [];
-
-let targetPoints = [];
-
-let formationStart = 0;
-
-const PARTICLE_COUNT = 9000;
-
-let image = null;
-
-
-/* --------------------------------------------------
-   RESIZE
--------------------------------------------------- */
-
-function resize(){
-
-    W = innerWidth;
-    H = innerHeight;
-
-    canvas.width = W;
-    canvas.height = H;
-
-    if(image){
-        createParticles(image);
-    }
-
-}
-
-addEventListener("resize",resize);
-
-
-/* --------------------------------------------------
-   RANDOM
--------------------------------------------------- */
-
-function rand(min,max){
-    return Math.random()*(max-min)+min;
-}
-
-function clamp(v,min,max){
-    return Math.max(min,Math.min(max,v));
-}
-
-
-/* --------------------------------------------------
-   LOAD IMAGE
--------------------------------------------------- */
-
-upload.addEventListener("change",function(e){
-
-    const file = e.target.files[0];
-
-    if(!file)return;
-
-    const reader = new FileReader();
-
-    reader.onload = function(event){
-
-        const img = new Image();
-
-        img.onload = function(){
-
-            image = img;
-
-            createParticles(img);
-
-            statusText.textContent =
-                "Particles forming...";
-
-            formationStart = performance.now();
-
-        };
-
-        img.src = event.target.result;
-
-    };
-
-    reader.readAsDataURL(file);
-
-});
-
-
-/* --------------------------------------------------
-   IMAGE PROCESSING
--------------------------------------------------- */
-
-function createParticles(img){
-
-    particles = [];
-    targetPoints = [];
-
-    /*
-       Work on a small processing canvas.
-       Smaller resolution gives a more artistic
-       particle appearance.
-    */
-
-    const processing = document.createElement("canvas");
-
-    const pw = 240;
-    const ph = Math.floor(
-        pw * img.height / img.width
-    );
-
-    processing.width = pw;
-    processing.height = ph;
-
-    const pctx = processing.getContext("2d");
-
-    pctx.drawImage(
-        img,
-        0,
-        0,
-        pw,
-        ph
-    );
-
-    let data = pctx.getImageData(
-        0,
-        0,
-        pw,
-        ph
-    ).data;
-
-
-    /*
-       We intentionally blur the image before
-       extracting structure.
-
-       This removes tiny facial details.
-    */
-
-    let blurred = new Uint8ClampedArray(data.length);
-
-    const radius = 3;
-
-    for(let y=0;y<ph;y++){
-
-        for(let x=0;x<pw;x++){
-
-            let total=0;
-            let count=0;
-
-            for(
-                let yy=-radius;
-                yy<=radius;
-                yy++
-            ){
-
-                for(
-                    let xx=-radius;
-                    xx<=radius;
-                    xx++
-                ){
-
-                    let sx=clamp(x+xx,0,pw-1);
-                    let sy=clamp(y+yy,0,ph-1);
-
-                    let index=(sy*pw+sx)*4;
-
-                    let r=data[index];
-                    let g=data[index+1];
-                    let b=data[index+2];
-
-                    /*
-                       Luminance
-                    */
-
-                    let lum=
-                        r*.299+
-                        g*.587+
-                        b*.114;
-
-                    total+=lum;
-                    count++;
-
-                }
-            }
-
-            let value=total/count;
-
-            let i=(y*pw+x)*4;
-
-            blurred[i]=value;
-            blurred[i+1]=value;
-            blurred[i+2]=value;
-            blurred[i+3]=255;
-
+  <canvas id="particleCanvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    let particlesArray = [];
+    
+    const image = new Image();
+    image.src = '2317.png'; 
+
+    image.addEventListener('load', function() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      const scale = Math.min(canvas.width / image.width, canvas.height / image.height) * 0.8;
+      const drawWidth = Math.floor(image.width * scale);
+      const drawHeight = Math.floor(image.height * scale);
+      const offsetX = (canvas.width - drawWidth) / 2;
+      const offsetY = (canvas.height - drawHeight) / 2;
+
+      const hiddenCanvas = document.createElement('canvas');
+      const hiddenCtx = hiddenCanvas.getContext('2d');
+      hiddenCanvas.width = drawWidth;
+      hiddenCanvas.height = drawHeight;
+      hiddenCtx.drawImage(image, 0, 0, drawWidth, drawHeight);
+      
+      const pixels = hiddenCtx.getImageData(0, 0, drawWidth, drawHeight).data;
+      
+      const neonColors = ['#ff0055', '#00eeff', '#ffaa00', '#bd00ff', '#00ff88'];
+
+      class Particle {
+        constructor(x, y, color) {
+          this.targetX = x + offsetX;
+          this.targetY = y + offsetY;
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.color = color;
+          this.size = Math.random() * 1.5 + 0.5; 
+          this.velocity = Math.random() * 0.03 + 0.015; 
         }
-    }
-
-
-    /*
-       Edge extraction.
-       This produces outlines instead of detailed
-       photographic faces.
-    */
-
-    for(let y=2;y<ph-2;y++){
-
-        for(let x=2;x<pw-2;x++){
-
-            let i=(y*pw+x)*4;
-
-            let left=blurred[i-8];
-            let right=blurred[i+8];
-
-            let top=blurred[i-ph*8];
-            let bottom=blurred[i+ph*8];
-
-            let dx=Math.abs(right-left);
-            let dy=Math.abs(bottom-top);
-
-            let edge=dx+dy;
-
-
-            /*
-               Ignore very weak edges.
-            */
-
-            if(edge < 55) continue;
-
-
-            /*
-               Keep the central subject region.
-               This helps suppress trees/background.
-            */
-
-            let normalizedX=x/pw;
-            let normalizedY=y/ph;
-
-            if(
-                normalizedX < .20 ||
-                normalizedX > .82 ||
-                normalizedY < .18 ||
-                normalizedY > .94
-            ){
-                continue;
-            }
-
-
-            /*
-               Random density.
-               Creates an organic particle texture.
-            */
-
-            if(Math.random() > .58) continue;
-
-
-            let sx =
-                (x/pw)*W;
-
-            let sy =
-                (y/ph)*H;
-
-
-            /*
-               Scale portrait slightly.
-            */
-
-            const scale=.82;
-
-            sx =
-                W/2+
-                (sx-W/2)*scale;
-
-            sy =
-                H/2+
-                (sy-H/2)*scale;
-
-
-            targetPoints.push({
-                x:sx,
-                y:sy,
-                strength:edge
-            });
-
+        
+        update() {
+          this.x += (this.targetX - this.x) * this.velocity;
+          this.y += (this.targetY - this.y) * this.velocity;
         }
-    }
-
-
-    /*
-       If too many points, randomly reduce them.
-    */
-
-    if(targetPoints.length > PARTICLE_COUNT){
-
-        targetPoints =
-            targetPoints
-            .sort(()=>Math.random()-.5)
-            .slice(0,PARTICLE_COUNT);
-
-    }
-
-
-    /*
-       Create particles.
-    */
-
-    for(let i=0;i<targetPoints.length;i++){
-
-        const target=targetPoints[i];
-
-        particles.push({
-
-            x:rand(0,W),
-            y:rand(0,H),
-
-            tx:target.x,
-            ty:target.y,
-
-            vx:rand(-2,2),
-            vy:rand(-2,2),
-
-            size:rand(.5,2.2),
-
-            delay:rand(0,3500),
-
-            life:rand(0,1),
-
-            hue:Math.random(),
-
-            phase:rand(0,Math.PI*2)
-
-        });
-
-    }
-
-
-    /*
-       Ambient particles.
-    */
-
-    ambient=[];
-
-    for(let i=0;i<900;i++){
-
-        ambient.push({
-
-            x:rand(0,W),
-            y:rand(0,H),
-
-            size:rand(.3,1.8),
-
-            speed:rand(.1,.45),
-
-            phase:rand(0,Math.PI*2),
-
-            hue:Math.random()
-
-        });
-
-    }
-
-}
-
-
-/* --------------------------------------------------
-   COLOR
--------------------------------------------------- */
-
-function particleColor(p,alpha){
-
-    /*
-       Cyan
-       Blue
-       Purple
-       Pink
-       Gold
-    */
-
-    const colors=[
-
-        [0,210,255],
-        [50,120,255],
-        [150,70,255],
-        [255,40,180],
-        [255,170,40]
-
-    ];
-
-    const index=
-        Math.floor(
-            p.hue*colors.length
-        )%colors.length;
-
-    const c=colors[index];
-
-    return `rgba(
-        ${c[0]},
-        ${c[1]},
-        ${c[2]},
-        ${alpha}
-    )`;
-
-}
-
-
-/* --------------------------------------------------
-   FORMATION
--------------------------------------------------- */
-
-function animateFormation(now){
-
-    ctx.clearRect(0,0,W,H);
-
-
-    /*
-       Dark atmospheric glow.
-    */
-
-    const gradient =
-        ctx.createRadialGradient(
-            W/2,
-            H*.55,
-            0,
-            W/2,
-            H*.55,
-            Math.max(W,H)*.65
-        );
-
-    gradient.addColorStop(
-        0,
-        "rgba(30,20,70,.15)"
-    );
-
-    gradient.addColorStop(
-        1,
-        "rgba(0,0,0,1)"
-    );
-
-    ctx.fillStyle=gradient;
-
-    ctx.fillRect(
-        0,
-        0,
-        W,
-        H
-    );
-
-
-    /*
-       Ambient particles
-    */
-
-    for(const a of ambient){
-
-        a.y-=a.speed;
-
-        if(a.y<0){
-            a.y=H;
+        
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = this.color;
+          ctx.fill();
         }
+      }
 
-        const pulse=
-            .5+
-            Math.sin(
-                now*.002+
-                a.phase
-            )*.5;
+      const gap = 3; 
+      const edgeThreshold = 25; 
 
-        ctx.beginPath();
+      for (let y = 0; y < drawHeight - gap; y += gap) {
+        for (let x = 0; x < drawWidth - gap; x += gap) {
+          const i = (y * drawWidth + x) * 4;
+          const rightI = (y * drawWidth + (x + gap)) * 4;
+          const bottomI = ((y + gap) * drawWidth + x) * 4;
 
-        ctx.fillStyle=
-            particleColor(
-                a,
-                .15+
-                pulse*.35
-            );
+          const alpha = pixels[i + 3];
+          const b1 = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
+          
+          // Skip transparent AND purely black background pixels
+          if (alpha < 50 || b1 < 15) continue; 
 
-        ctx.arc(
-            a.x,
-            a.y,
-            a.size,
-            0,
-            Math.PI*2
-        );
+          const b2 = (pixels[rightI] + pixels[rightI+1] + pixels[rightI+2]) / 3;
+          const b3 = (pixels[bottomI] + pixels[bottomI+1] + pixels[bottomI+2]) / 3;
 
-        ctx.fill();
-
-    }
-
-
-    /*
-       Formation progress
-    */
-
-    let elapsed =
-        now-formationStart;
-
-    let progress =
-        clamp(
-            elapsed/6500,
-            0,
-            1
-        );
-
-
-    /*
-       Smooth easing
-    */
-
-    let ease =
-        1-
-        Math.pow(
-            1-progress,
-            4
-        );
-
-
-    for(const p of particles){
-
-        /*
-           Individual particle delay
-        */
-
-        let localProgress =
-            clamp(
-                (elapsed-p.delay)/4200,
-                0,
-                1
-            );
-
-        let localEase =
-            1-
-            Math.pow(
-                1-localProgress,
-                3
-            );
-
-
-        /*
-           Random starting explosion
-        */
-
-        const startX=
-            p.tx+
-            Math.cos(p.phase)*
-            rand(180,650);
-
-        const startY=
-            p.ty+
-            Math.sin(p.phase)*
-            rand(180,650);
-
-
-        /*
-           Move toward target
-        */
-
-        p.x =
-            startX+
-            (p.tx-startX)*
-            localEase;
-
-        p.y =
-            startY+
-            (p.ty-startY)*
-            localEase;
-
-
-        /*
-           Small organic movement after formation
-        */
-
-        if(localProgress>=1){
-
-            p.x +=
-                Math.sin(
-                    now*.001+
-                    p.phase
-                )*.45;
-
-            p.y +=
-                Math.cos(
-                    now*.0012+
-                    p.phase
-                )*.45;
-
+          // Edge detection
+          if (Math.abs(b1 - b2) > edgeThreshold || Math.abs(b1 - b3) > edgeThreshold) {
+            const randomNeon = neonColors[Math.floor(Math.random() * neonColors.length)];
+            particlesArray.push(new Particle(x, y, randomNeon));
+          }
         }
+      }
 
+      function animate() {
+        ctx.shadowBlur = 0; 
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(5, 5, 16, 0.15)'; 
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.globalCompositeOperation = 'lighter';
 
-        /*
-           Particle brightness
-        */
-
-        let alpha =
-            .25+
-            localEase*.75;
-
-
-        /*
-           Glow
-        */
-
-        ctx.shadowBlur =
-            5+
-            localEase*9;
-
-        ctx.shadowColor=
-            particleColor(
-                p,
-                .8
-            );
-
-        ctx.beginPath();
-
-        ctx.fillStyle=
-            particleColor(
-                p,
-                alpha
-            );
-
-        ctx.arc(
-            p.x,
-            p.y,
-            p.size,
-            0,
-            Math.PI*2
-        );
-
-        ctx.fill();
-
-    }
-
-
-    ctx.shadowBlur=0;
-
-
-    /*
-       Formation status
-    */
-
-    if(progress<1){
-
-        statusText.textContent=
-            "Reconstructing memory • "+
-            Math.floor(progress*100)+
-            "%";
-
-    }else{
-
-        statusText.textContent=
-            "Particle portrait";
-
-    }
-
-
-    requestAnimationFrame(animateFormation);
-
-}
-
-
-requestAnimationFrame(animateFormation);
-
-
-/* --------------------------------------------------
-   REPLAY
--------------------------------------------------- */
-
-replay.addEventListener("click",()=>{
-
-    if(!image)return;
-
-    createParticles(image);
-
-    formationStart=
-        performance.now();
-
-});
-
-
-/* --------------------------------------------------
-   CLICK CANVAS = REPLAY
--------------------------------------------------- */
-
-canvas.addEventListener("click",()=>{
-
-    if(!image)return;
-
-    createParticles(image);
-
-    formationStart=
-        performance.now();
-
-});
-
-
-</script>
-
+        for (let i = 0; i < particlesArray.length; i++) {
+          particlesArray[i].update();
+          particlesArray[i].draw();
+        }
+        
+        requestAnimationFrame(animate);
+      }
+      
+      animate();
+    });
+  </script>
 </body>
-  </html>
+</html>
