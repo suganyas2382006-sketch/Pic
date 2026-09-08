@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,7 +27,7 @@
       justify-content: center;
       align-items: center;
       font-family: 'Montserrat', sans-serif;
-      overflow: hidden; /* Prevents background scrolling */
+      overflow: hidden; 
     }
 
     /* Moving Background Hearts */
@@ -61,22 +60,17 @@
       100% { transform: translateY(-10vh) rotate(45deg) scale(1.2); opacity: 0; }
     }
 
-    /* Responsive Container */
     .container {
       position: relative;
       perspective: 1200px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
+      margin-top: 5vh; /* Responsive center offset */
       z-index: 10;
     }
 
-    /* Envelope Styling (Scales for Mobile) */
+    /* Envelope Styling */
     .envelope {
       position: relative;
-      width: 320px; /* Fits even the smallest phones perfectly */
+      width: 320px; /* Slimmer to fit all mobile screens perfectly */
       height: 220px;
       background: var(--wine-medium);
       border-radius: 6px;
@@ -119,7 +113,7 @@
       border-radius: 0 0 6px 6px;
     }
 
-    /* Responsive Letter */
+    /* The Scrollable Letter */
     .letter {
       position: absolute;
       bottom: 0;
@@ -134,35 +128,48 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 30px 15px;
+      padding: 25px 15px 35px 15px;
       box-sizing: border-box;
       border: 1px solid var(--wine-glow);
-      /* Scrollbar added in case of small screens */
+      
+      /* Allows internal scrolling without breaking layout */
       overflow-y: auto; 
       overflow-x: hidden;
-      scrollbar-width: none; /* Hides scrollbar in Firefox */
+      
       transition: height 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                   z-index 0s 1.1s;
     }
-    
-    .letter::-webkit-scrollbar { display: none; /* Hides scrollbar in Chrome/Safari */ }
+
+    /* Sleek Scrollbar for Webkit */
+    .letter::-webkit-scrollbar {
+      width: 4px;
+    }
+    .letter::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .letter::-webkit-scrollbar-thumb {
+      background: var(--wine-glow);
+      border-radius: 10px;
+    }
 
     .content {
       opacity: 0;
       text-align: center;
       width: 100%;
-      height: 100%;
+      height: auto;
+      min-height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
+      justify-content: flex-start; /* Prevents stretching */
       align-items: center;
+      gap: 15px;
       transition: opacity 0.3s ease-out;
     }
 
     /* Active States (Opening Animations) */
     .envelope.open {
-      transform: translateY(60px); /* Glides envelope down so letter has room */
+      transform: translateY(12vh); /* Pushes the envelope down to make room for the letter */
     }
 
     .envelope.open .flap {
@@ -172,9 +179,9 @@
     }
 
     .envelope.open .letter {
-      bottom: 100px;
-      height: 70vh; /* Expands perfectly relative to screen height */
-      max-height: 600px; 
+      bottom: 70px;
+      height: 65vh; /* Dynamically scales to fill 65% of ANY screen height */
+      max-height: 520px; /* Hard cap so it never looks stretched */
       z-index: 5;
       transition: height 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -186,12 +193,12 @@
       transition: opacity 1s 1.6s ease-in;
     }
 
-    /* Fluid Typography (Adapts to screen size) */
+    /* Typography & Graphic Accents */
     .greeting {
       font-family: 'Great Vibes', cursive;
-      font-size: clamp(32px, 8vw, 42px);
+      font-size: clamp(32px, 8vw, 38px);
       color: var(--wine-glow);
-      margin: 0 0 10px 0;
+      margin: 0;
       text-shadow: 0 0 15px rgba(184, 29, 59, 0.6);
       display: flex;
       align-items: center;
@@ -200,12 +207,13 @@
     }
 
     .message {
-      font-size: clamp(13px, 3.5vw, 15px);
+      font-size: clamp(12px, 3.5vw, 14px);
       color: var(--text-main);
-      line-height: 1.9;
-      margin: 0 0 20px 0;
+      line-height: 1.7;
+      margin: 0;
       font-style: italic;
       letter-spacing: 0.5px;
+      padding: 0 5px;
     }
 
     /* Custom CSS Heart */
@@ -239,12 +247,13 @@
       70% { transform: rotate(45deg) scale(0.8); }
     }
 
-    /* Dynamic Photo Frame (Adapts to Image Shape exactly) */
+    /* Dynamic Photo Frame (Matches Image Shape Exactly) */
     .photo-container {
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
+      margin: 5px 0;
     }
 
     .photo-frame {
@@ -256,20 +265,20 @@
       padding: 0;
       font-size: 0; 
       overflow: hidden;
-      max-width: 90%; /* Prevents breaking the letter bounds */
+      max-width: 95%; 
     }
 
     .photo-frame img {
       display: block;
       max-width: 100%;  
-      max-height: 22vh; /* Protects layout on small height screens */
+      max-height: 180px; /* Constrains extremely tall images */
       width: auto;
       height: auto;
     }
 
     /* Timer Area */
     .timer-container {
-      margin-top: 20px;
+      margin-top: auto;
       padding-top: 15px;
       border-top: 1px solid rgba(184, 29, 59, 0.4);
       width: 100%;
@@ -278,10 +287,10 @@
     .timer-label {
       font-family: 'Cinzel', serif;
       font-size: clamp(9px, 2.5vw, 11px);
-      letter-spacing: 3px;
+      letter-spacing: 4px;
       color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .timer-display {
@@ -293,10 +302,10 @@
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 15px var(--wine-glow);
     }
 
-    /* Touch to Open/Close Label */
+    /* Touch to Open Label */
     .click-instruction {
       position: absolute;
-      bottom: -40px;
+      bottom: -45px;
       left: 50%;
       transform: translateX(-50%);
       color: var(--wine-glow);
@@ -335,7 +344,6 @@
   </script>
 
   <div class="container">
-    <!-- Click function toggles open/close -->
     <div class="envelope" onclick="toggleLetter(this)">
       <div class="flap"></div>
       <div class="pocket"></div>
@@ -343,22 +351,19 @@
       <div class="letter">
         <div class="content">
           
-          <div>
-            <h1 class="greeting">Hey my prince <div class="animated-heart"></div></h1>
-            
-            <p class="message">
-              Suddenly, I remembered us in that park…<br>
-              the hugs, the kisses, the moments we shared.<br>
-              And somehow, that little memory<br>
-              still makes my heart smile,<br>
-              like a beautiful moment I never want to forget. <span style="display:inline-block; margin-left: 5px;"><div class="animated-heart" style="transform: scale(0.6) rotate(45deg);"></div></span>
-            </p>
+          <h1 class="greeting">Hey my prince <div class="animated-heart"></div></h1>
+          
+          <p class="message">
+            Suddenly, I remembered us in that park…<br>
+            the hugs, the kisses, the moments we shared.<br>
+            And somehow, that little memory<br>
+            still makes my heart smile,<br>
+            like a beautiful moment I never want to forget. <span style="display:inline-block; margin-left: 5px;"><div class="animated-heart" style="transform: scale(0.6) rotate(45deg);"></div></span>
+          </p>
 
-            <div class="photo-container">
-              <div class="photo-frame">
-                <!-- Direct image path matching your GitHub file -->
-                <img src="image.jpg" alt="Us">
-              </div>
+          <div class="photo-container">
+            <div class="photo-frame">
+              <img src="image.jpg" alt="Us">
             </div>
           </div>
 
@@ -373,7 +378,6 @@
     </div>
   </div>
 
-  <!-- Interactive Scripts -->
   <script>
     function toggleLetter(element) {
       element.classList.toggle('open');
