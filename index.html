@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,14 +22,13 @@
     body {
       margin: 0;
       padding: 0;
-      height: 100vh;
+      min-height: 100vh;
       background: radial-gradient(circle at center, var(--dark-bg), var(--black));
       display: flex;
       justify-content: center;
       align-items: center;
       font-family: 'Montserrat', sans-serif;
-      overflow: hidden;
-      position: relative;
+      overflow: hidden; /* Prevents background scrolling */
     }
 
     /* Moving Background Hearts */
@@ -61,18 +61,23 @@
       100% { transform: translateY(-10vh) rotate(45deg) scale(1.2); opacity: 0; }
     }
 
+    /* Responsive Container */
     .container {
       position: relative;
       perspective: 1200px;
-      margin-top: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
       z-index: 10;
     }
 
-    /* Envelope Styling */
+    /* Envelope Styling (Scales for Mobile) */
     .envelope {
       position: relative;
-      width: 350px;
-      height: 240px;
+      width: 320px; /* Fits even the smallest phones perfectly */
+      height: 220px;
       background: var(--wine-medium);
       border-radius: 6px;
       box-shadow: 0 25px 50px rgba(0,0,0,0.9), inset 0 0 0 1px var(--wine-bright);
@@ -92,9 +97,9 @@
       left: 0;
       width: 0;
       height: 0;
-      border-left: 175px solid transparent;
-      border-right: 175px solid transparent;
-      border-top: 135px solid var(--wine-deep);
+      border-left: 160px solid transparent;
+      border-right: 160px solid transparent;
+      border-top: 125px solid var(--wine-deep);
       transform-origin: top;
       z-index: 4;
       transition: transform 0.6s 1.1s cubic-bezier(0.4, 0, 0.2, 1), z-index 0s 1.1s; 
@@ -106,21 +111,22 @@
       left: 0;
       width: 0;
       height: 0;
-      border-left: 175px solid #3d0813;
-      border-right: 175px solid #3d0813;
-      border-bottom: 135px solid #33050f;
+      border-left: 160px solid #3d0813;
+      border-right: 160px solid #3d0813;
+      border-bottom: 120px solid #33050f;
       z-index: 3;
       pointer-events: none;
       border-radius: 0 0 6px 6px;
     }
 
+    /* Responsive Letter */
     .letter {
       position: absolute;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       width: 90%;
-      height: 220px;
+      height: 200px;
       background: #0a0103;
       border-radius: 8px;
       z-index: 2;
@@ -128,13 +134,19 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 35px 25px;
+      padding: 30px 15px;
       box-sizing: border-box;
       border: 1px solid var(--wine-glow);
+      /* Scrollbar added in case of small screens */
+      overflow-y: auto; 
+      overflow-x: hidden;
+      scrollbar-width: none; /* Hides scrollbar in Firefox */
       transition: height 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                   z-index 0s 1.1s;
     }
+    
+    .letter::-webkit-scrollbar { display: none; /* Hides scrollbar in Chrome/Safari */ }
 
     .content {
       opacity: 0;
@@ -149,6 +161,10 @@
     }
 
     /* Active States (Opening Animations) */
+    .envelope.open {
+      transform: translateY(60px); /* Glides envelope down so letter has room */
+    }
+
     .envelope.open .flap {
       transform: rotateX(180deg);
       z-index: 1;
@@ -156,8 +172,9 @@
     }
 
     .envelope.open .letter {
-      bottom: 120px;
-      height: 620px;
+      bottom: 100px;
+      height: 70vh; /* Expands perfectly relative to screen height */
+      max-height: 600px; 
       z-index: 5;
       transition: height 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -169,23 +186,23 @@
       transition: opacity 1s 1.6s ease-in;
     }
 
-    /* Typography & Graphic Accents */
+    /* Fluid Typography (Adapts to screen size) */
     .greeting {
       font-family: 'Great Vibes', cursive;
-      font-size: 42px;
+      font-size: clamp(32px, 8vw, 42px);
       color: var(--wine-glow);
-      margin: 0 0 15px 0;
+      margin: 0 0 10px 0;
       text-shadow: 0 0 15px rgba(184, 29, 59, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .message {
-      font-size: 15px;
+      font-size: clamp(13px, 3.5vw, 15px);
       color: var(--text-main);
-      line-height: 2;
+      line-height: 1.9;
       margin: 0 0 20px 0;
       font-style: italic;
       letter-spacing: 0.5px;
@@ -194,25 +211,25 @@
     /* Custom CSS Heart */
     .animated-heart {
       display: inline-block;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       background-color: var(--wine-glow);
       transform: rotate(45deg);
       animation: heartbeat 1.5s infinite;
-      box-shadow: 0 0 12px var(--wine-glow);
+      box-shadow: 0 0 10px var(--wine-glow);
       position: relative;
       top: -2px;
     }
     .animated-heart::before, .animated-heart::after {
       content: '';
       position: absolute;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       background-color: var(--wine-glow);
       border-radius: 50%;
     }
-    .animated-heart::before { top: -8px; left: 0; }
-    .animated-heart::after { top: 0; left: -8px; }
+    .animated-heart::before { top: -7px; left: 0; }
+    .animated-heart::after { top: 0; left: -7px; }
 
     @keyframes heartbeat {
       0% { transform: rotate(45deg) scale(0.8); }
@@ -222,67 +239,69 @@
       70% { transform: rotate(45deg) scale(0.8); }
     }
 
-    /* Dynamic Photo Frame (Matches Image Shape Exactly) */
+    /* Dynamic Photo Frame (Adapts to Image Shape exactly) */
     .photo-container {
       width: 100%;
-      text-align: center;
-      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .photo-frame {
       display: inline-block; 
       border: 3px solid var(--wine-glow);
-      border-radius: 8px; 
-      box-shadow: 0 0 30px rgba(184, 29, 59, 0.5);
+      border-radius: 6px; 
+      box-shadow: 0 0 25px rgba(184, 29, 59, 0.5);
       background-color: var(--black);
       padding: 0;
       font-size: 0; 
       overflow: hidden;
+      max-width: 90%; /* Prevents breaking the letter bounds */
     }
 
     .photo-frame img {
       display: block;
-      max-width: 250px;  
-      max-height: 180px; 
+      max-width: 100%;  
+      max-height: 22vh; /* Protects layout on small height screens */
       width: auto;
       height: auto;
     }
 
     /* Timer Area */
     .timer-container {
-      margin-top: 25px;
-      padding-top: 20px;
+      margin-top: 20px;
+      padding-top: 15px;
       border-top: 1px solid rgba(184, 29, 59, 0.4);
       width: 100%;
     }
 
     .timer-label {
       font-family: 'Cinzel', serif;
-      font-size: 11px;
-      letter-spacing: 4px;
+      font-size: clamp(9px, 2.5vw, 11px);
+      letter-spacing: 3px;
       color: var(--text-muted);
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .timer-display {
       font-family: 'Cinzel', serif;
-      font-size: 18px;
+      font-size: clamp(14px, 4vw, 18px);
       color: #ffffff;
       font-weight: 600;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px rgba(255, 255, 255, 0.4), 0 0 20px var(--wine-glow);
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 15px var(--wine-glow);
     }
 
-    /* Touch to Open Label */
+    /* Touch to Open/Close Label */
     .click-instruction {
       position: absolute;
-      bottom: -50px;
+      bottom: -40px;
       left: 50%;
       transform: translateX(-50%);
       color: var(--wine-glow);
       font-family: 'Cinzel', serif;
-      font-size: 14px;
+      font-size: 13px;
       letter-spacing: 4px;
       pointer-events: none;
       animation: pulse-text 2s infinite;
@@ -304,7 +323,7 @@
       let heart = document.createElement('div');
       heart.className = 'bg-heart';
       
-      let size = Math.random() * 10 + 6;
+      let size = Math.random() * 8 + 6;
       heart.style.width = size + 'px';
       heart.style.height = size + 'px';
       heart.style.left = Math.random() * 100 + 'vw';
@@ -316,6 +335,7 @@
   </script>
 
   <div class="container">
+    <!-- Click function toggles open/close -->
     <div class="envelope" onclick="toggleLetter(this)">
       <div class="flap"></div>
       <div class="pocket"></div>
@@ -336,7 +356,7 @@
 
             <div class="photo-container">
               <div class="photo-frame">
-                <!-- Path updated to standard image format -->
+                <!-- Direct image path matching your GitHub file -->
                 <img src="image.jpg" alt="Us">
               </div>
             </div>
@@ -353,6 +373,7 @@
     </div>
   </div>
 
+  <!-- Interactive Scripts -->
   <script>
     function toggleLetter(element) {
       element.classList.toggle('open');
