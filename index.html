@@ -3,129 +3,307 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Neon Structure Reveal</title>
+  <title>For My Prince</title>
   <style>
-    body { 
-      margin: 0; 
-      background: #000000; /* Pure black for better contrast */
-      overflow: hidden; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500&family=Great+Vibes&family=Montserrat:wght@300;400&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: radial-gradient(circle at center, #110008, #050002);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Montserrat', sans-serif;
+      overflow: hidden;
     }
-    canvas { display: block; }
+
+    /* Ambient Background Particles */
+    .sparkle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ff4d6d;
+      border-radius: 50%;
+      box-shadow: 0 0 10px 2px rgba(255, 77, 109, 0.5);
+      animation: twinkle 4s infinite alternate;
+    }
+
+    @keyframes twinkle {
+      0% { opacity: 0.1; transform: scale(1); }
+      100% { opacity: 1; transform: scale(2); }
+    }
+
+    .container {
+      position: relative;
+      perspective: 1200px;
+      margin-top: 120px;
+    }
+
+    .envelope {
+      position: relative;
+      width: 340px;
+      height: 230px;
+      background: #1a0b12;
+      border-radius: 6px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 0 1px #ff4d6d;
+      cursor: pointer;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .envelope:hover {
+      transform: translateY(-12px) scale(1.02);
+    }
+
+    .flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 170px solid transparent;
+      border-right: 170px solid transparent;
+      border-top: 130px solid #2d1320;
+      transform-origin: top;
+      transition: transform 0.8s 0.2s cubic-bezier(0.4, 0, 0.2, 1), z-index 0.2s;
+      z-index: 4;
+    }
+
+    .pocket {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 170px solid #240e19;
+      border-right: 170px solid #240e19;
+      border-bottom: 130px solid #1f0b15;
+      z-index: 3;
+      pointer-events: none;
+      border-radius: 0 0 6px 6px;
+    }
+
+    .letter {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      height: 200px;
+      background: #12050a;
+      border-radius: 8px;
+      z-index: 2;
+      transition: height 1.2s 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                  bottom 1.2s 0.8s cubic-bezier(0.4, 0, 0.2, 1), 
+                  z-index 0.1s 0.8s;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      box-sizing: border-box;
+      border: 1px solid #ff4d6d;
+    }
+
+    /* Active Animation States */
+    .envelope.open .flap {
+      transform: rotateX(180deg);
+      z-index: 1;
+      transition: transform 0.8s, z-index 0s 0.4s;
+    }
+
+    .envelope.open .letter {
+      bottom: 110px;
+      height: 600px;
+      z-index: 5;
+    }
+
+    .content {
+      opacity: 0;
+      transition: opacity 1.5s 1.8s ease-in;
+      text-align: center;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .envelope.open .content {
+      opacity: 1;
+    }
+
+    /* Typography & Graphic Accents */
+    .greeting {
+      font-family: 'Great Vibes', cursive;
+      font-size: 38px;
+      color: #ffb3c1;
+      margin: 0 0 10px 0;
+      text-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
+    }
+
+    .animated-heart {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      background-color: #ff4d6d;
+      transform: rotate(45deg);
+      animation: heartbeat 1.5s infinite;
+      box-shadow: 0 0 10px #ff4d6d;
+      margin: 0 5px;
+    }
+    .animated-heart::before, .animated-heart::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background-color: #ff4d6d;
+      border-radius: 50%;
+    }
+    .animated-heart::before { top: -9px; left: 0; }
+    .animated-heart::after { top: 0; left: -9px; }
+
+    @keyframes heartbeat {
+      0% { transform: rotate(45deg) scale(0.8); }
+      14% { transform: rotate(45deg) scale(1.1); }
+      28% { transform: rotate(45deg) scale(0.8); }
+      42% { transform: rotate(45deg) scale(1.1); }
+      70% { transform: rotate(45deg) scale(0.8); }
+    }
+
+    .message {
+      font-size: 14px;
+      color: #ffccd5;
+      line-height: 1.9;
+      margin: 0 0 25px 0;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    .photo-frame {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid #ff4d6d;
+      margin: 0 auto;
+      box-shadow: 0 0 25px rgba(255, 77, 109, 0.4);
+      position: relative;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .timer-container {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 77, 109, 0.3);
+    }
+
+    .timer-label {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #ffb3c1;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .timer-display {
+      font-family: 'Cinzel', serif;
+      font-size: 16px;
+      color: #fff;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    }
+
+    .click-instruction {
+      position: absolute;
+      bottom: -45px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ff4d6d;
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 3px;
+      pointer-events: none;
+      animation: pulse-text 2s infinite;
+    }
+
+    @keyframes pulse-text {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; text-shadow: 0 0 10px #ff4d6d; }
+      100% { opacity: 0.4; }
+    }
   </style>
 </head>
 <body>
-  <canvas id="particleCanvas"></canvas>
 
   <script>
-    const canvas = document.getElementById('particleCanvas');
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    let particlesArray = [];
-    
-    const image = new Image();
-    image.src = '2317.png'; 
+    for(let i=0; i<40; i++) {
+      let sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.style.top = Math.random() * 100 + 'vh';
+      sparkle.style.left = Math.random() * 100 + 'vw';
+      sparkle.style.animationDelay = (Math.random() * 4) + 's';
+      document.body.appendChild(sparkle);
+    }
+  </script>
 
-    image.addEventListener('load', function() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+  <div class="container">
+    <div class="envelope" onclick="this.classList.add('open')">
+      <div class="flap"></div>
+      <div class="pocket"></div>
       
-      const scale = Math.min(canvas.width / image.width, canvas.height / image.height) * 0.8;
-      const drawWidth = Math.floor(image.width * scale);
-      const drawHeight = Math.floor(image.height * scale);
-      const offsetX = (canvas.width - drawWidth) / 2;
-      const offsetY = (canvas.height - drawHeight) / 2;
+      <div class="letter">
+        <div class="content">
+          <div>
+            <h1 class="greeting">Hey my prince <div class="animated-heart"></div></h1>
+            
+            <p class="message">
+              Suddenly, I remembered us in that park…<br>
+              the hugs, the kisses, the moments we shared.<br>
+              And somehow, that little memory<br>
+              still makes my heart smile,<br>
+              like a beautiful moment I never want to forget. <div class="animated-heart" style="transform: scale(0.6) rotate(45deg);"></div>
+            </p>
 
-      const hiddenCanvas = document.createElement('canvas');
-      const hiddenCtx = hiddenCanvas.getContext('2d');
-      hiddenCanvas.width = drawWidth;
-      hiddenCanvas.height = drawHeight;
-      hiddenCtx.drawImage(image, 0, 0, drawWidth, drawHeight);
-      
-      const pixels = hiddenCtx.getImageData(0, 0, drawWidth, drawHeight).data;
-      
-      const neonColors = ['#ff0055', '#00eeff', '#ffaa00', '#bd00ff', '#00ff88'];
+            <div class="photo-frame">
+              <img src="https://kommodo.ai/i/Wt0olnyPHVzI7QE5sIg9" alt="Us">
+            </div>
+          </div>
 
-      class Particle {
-        constructor(x, y, color) {
-          // Start exactly where they belong to avoid the explosion effect
-          this.x = x + offsetX;
-          this.y = y + offsetY;
-          this.baseX = this.x;
-          this.baseY = this.y;
-          this.color = color;
-          this.size = Math.random() * 1.5 + 0.5; 
-          
-          // Variables for a gentle twinkling float instead of flying
-          this.angle = Math.random() * Math.PI * 2;
-          this.speed = Math.random() * 0.05 + 0.02;
-        }
-        
-        update() {
-          // Subtle floating movement in place
-          this.x = this.baseX + Math.cos(this.angle) * 1.2;
-          this.y = this.baseY + Math.sin(this.angle) * 1.2;
-          this.angle += this.speed;
-        }
-        
-        draw() {
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-          ctx.fillStyle = this.color;
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = this.color;
-          ctx.fill();
-        }
-      }
+          <div class="timer-container">
+            <div class="timer-label">Together Since ✦ Feb 18, 2025</div>
+            <div class="timer-display" id="timer">Calculating...</div>
+          </div>
+        </div>
+      </div>
+      <div class="click-instruction">Touch To Open</div>
+    </div>
+  </div>
 
-      const gap = 3; 
-      const edgeThreshold = 30; // Increased to ignore slight photo variations
-      const minBrightness = 40; // STRICTLY ignores background compression noise
+  <script>
+    const startDate = new Date("2025-02-18T00:00:00").getTime();
 
-      for (let y = 0; y < drawHeight - gap; y += gap) {
-        for (let x = 0; x < drawWidth - gap; x += gap) {
-          const i = (y * drawWidth + x) * 4;
-          const rightI = (y * drawWidth + (x + gap)) * 4;
-          const bottomI = ((y + gap) * drawWidth + x) * 4;
+    setInterval(() => {
+      const now = new Date().getTime();
+      const difference = now - startDate;
 
-          const alpha = pixels[i + 3];
-          const b1 = (pixels[i] + pixels[i+1] + pixels[i+2]) / 3;
-          
-          // If the pixel is dark, kill it immediately. No background noise allowed.
-          if (alpha < 50 || b1 < minBrightness) continue; 
+      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-          const b2 = (pixels[rightI] + pixels[rightI+1] + pixels[rightI+2]) / 3;
-          const b3 = (pixels[bottomI] + pixels[bottomI+1] + pixels[bottomI+2]) / 3;
-
-          // Edge detection
-          if (Math.abs(b1 - b2) > edgeThreshold || Math.abs(b1 - b3) > edgeThreshold) {
-            const randomNeon = neonColors[Math.floor(Math.random() * neonColors.length)];
-            particlesArray.push(new Particle(x, y, randomNeon));
-          }
-        }
-      }
-
-      function animate() {
-        ctx.shadowBlur = 0; 
-        ctx.globalCompositeOperation = 'source-over';
-        // Darker clear rectangle to eliminate the long laser trails
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        
-        ctx.globalCompositeOperation = 'lighter';
-
-        for (let i = 0; i < particlesArray.length; i++) {
-          particlesArray[i].update();
-          particlesArray[i].draw();
-        }
-        
-        requestAnimationFrame(animate);
-      }
-      
-      animate();
-    });
+      document.getElementById('timer').innerText = 
+        `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    }, 1000);
   </script>
 </body>
 </html>
