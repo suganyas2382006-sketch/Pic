@@ -30,7 +30,6 @@
       overflow: hidden; 
     }
 
-    /* Moving Background Hearts */
     .bg-heart {
       position: absolute;
       background-color: var(--wine-glow);
@@ -63,14 +62,13 @@
     .container {
       position: relative;
       perspective: 1200px;
-      margin-top: 5vh; /* Responsive center offset */
+      margin-top: 5vh; 
       z-index: 10;
     }
 
-    /* Envelope Styling */
     .envelope {
       position: relative;
-      width: 320px; /* Slimmer to fit all mobile screens perfectly */
+      width: 320px; 
       height: 220px;
       background: var(--wine-medium);
       border-radius: 6px;
@@ -84,7 +82,6 @@
       transform: translateY(-5px) scale(1.01);
     }
 
-    /* Base States (Closing Animations) */
     .flap {
       position: absolute;
       top: 0;
@@ -113,7 +110,6 @@
       border-radius: 0 0 6px 6px;
     }
 
-    /* The Scrollable Letter */
     .letter {
       position: absolute;
       bottom: 0;
@@ -131,17 +127,15 @@
       padding: 25px 15px 35px 15px;
       box-sizing: border-box;
       border: 1px solid var(--wine-glow);
-      
-      /* Allows internal scrolling without breaking layout */
       overflow-y: auto; 
       overflow-x: hidden;
       
+      /* FIXED: z-index delay changed to 0.3s so it correctly drops behind the pocket on close */
       transition: height 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                  z-index 0s 1.1s;
+                  z-index 0s 0.3s;
     }
 
-    /* Sleek Scrollbar for Webkit */
     .letter::-webkit-scrollbar {
       width: 4px;
     }
@@ -161,15 +155,14 @@
       min-height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Prevents stretching */
+      justify-content: flex-start; 
       align-items: center;
       gap: 15px;
       transition: opacity 0.3s ease-out;
     }
 
-    /* Active States (Opening Animations) */
     .envelope.open {
-      transform: translateY(12vh); /* Pushes the envelope down to make room for the letter */
+      transform: translateY(12vh); 
     }
 
     .envelope.open .flap {
@@ -180,8 +173,8 @@
 
     .envelope.open .letter {
       bottom: 70px;
-      height: 65vh; /* Dynamically scales to fill 65% of ANY screen height */
-      max-height: 520px; /* Hard cap so it never looks stretched */
+      height: 65vh; 
+      max-height: 520px; 
       z-index: 5;
       transition: height 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
                   bottom 1s 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
@@ -193,7 +186,6 @@
       transition: opacity 1s 1.6s ease-in;
     }
 
-    /* Typography & Graphic Accents */
     .greeting {
       font-family: 'Great Vibes', cursive;
       font-size: clamp(32px, 8vw, 38px);
@@ -216,7 +208,6 @@
       padding: 0 5px;
     }
 
-    /* Custom CSS Heart */
     .animated-heart {
       display: inline-block;
       width: 14px;
@@ -247,7 +238,6 @@
       70% { transform: rotate(45deg) scale(0.8); }
     }
 
-    /* Dynamic Photo Frame (Matches Image Shape Exactly) */
     .photo-container {
       width: 100%;
       display: flex;
@@ -271,12 +261,11 @@
     .photo-frame img {
       display: block;
       max-width: 100%;  
-      max-height: 180px; /* Constrains extremely tall images */
+      max-height: 180px; 
       width: auto;
       height: auto;
     }
 
-    /* Timer Area */
     .timer-container {
       margin-top: auto;
       padding-top: 15px;
@@ -302,7 +291,6 @@
       text-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 15px var(--wine-glow);
     }
 
-    /* Touch to Open Label */
     .click-instruction {
       position: absolute;
       bottom: -45px;
@@ -326,7 +314,6 @@
 </head>
 <body>
 
-  <!-- Floating Background Hearts Generator -->
   <script>
     for(let i=0; i<35; i++) {
       let heart = document.createElement('div');
